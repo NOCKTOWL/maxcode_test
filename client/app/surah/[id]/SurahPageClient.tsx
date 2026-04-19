@@ -25,7 +25,7 @@ type ArabicFontOption = "amiri" | "noto-naskh-arabic" | "rubik";
 
 const FontClasses = {
   amiri: "font-amiri",
-  naksh: "font-noto-naskh-arabic",
+  "noto-naskh-arabic": "font-noto-naskh-arabic",
   rubik: "font-rubik",
 };
 
