@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // IMPORT ROUTES
-import {SurahRoutes} from './routes/surah.routes';
+import { SurahRoutes } from './routes/surah.routes';
 import { VersesRoutes } from './routes/verses.route';
 
 // EXPRESS APP
