@@ -10,6 +10,7 @@
   --color-foreground: var(--foreground);
   --font-poppins: var(--font-poppins);
   --font-amiri: var(--font-amiri);
+  --font-rubik: var(--font-rubik);
 }
 
 @media (prefers-color-scheme: dark) {

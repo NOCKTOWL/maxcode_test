@@ -4,7 +4,7 @@ import {Router, type Request, type Response} from 'express';
 export const VersesRoutes = Router();
 
 VersesRoutes.get('/verses/by_chapter/:chapter_number', async (req: Request, res: Response) => {
-    const { chapter_number } = req.params;
+    const { chapter_number } = await req.params;
     try {
         const clientId = process.env.DEV_CLIENT_ID;
         const clientSecret = process.env.DEV_CLIENT_SECRET;

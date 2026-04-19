@@ -1,3 +1,5 @@
+
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 export async function getAllSurahs() {
@@ -7,7 +9,7 @@ export async function getAllSurahs() {
       headers: {
         Accept: "application/json",
       },
-      cache: "no-store",
+      cache: "force-cache",
     });
 
     if (!response.ok) {
@@ -23,13 +25,14 @@ export async function getAllSurahs() {
 }
 
 export async function getSurahById(id: number) {
+  
   try {
     const response = await fetch(`${BASE_URL}/api/verses/by_chapter/${id}`, {
       method: "GET",
       headers: {
         Accept: "application/json",
       },
-      cache: "no-store",
+      cache: "force-cache",
     });
 
     if (!response.ok) {

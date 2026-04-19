@@ -1,120 +1,78 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { getAllSurahs } from "../lib/api";
+import Link from "next/link";
 
 type Surah = {
-  id: number;
-  revelation_place: string;
-  revelation_order: number;
-  bismillah_pre: boolean;
-  name_simple: string;
-  name_complex: string;
-  name_arabic: string;
-  verses_count: number;
-  pages: number[];
-  translated_name: {
-    language_name: string;
-    name: string;
-  };
+  surahName: string;
+  surahNameArabic: string;
+  surahNameArabicLong: string;
+  surahNameTranslation: string;
+  revelationPlace: string;
+  totalAyahs: number;
 };
 
-const HomeComp = () => {
-  const [surahs, setSurahs] = useState<Surah[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchSurahs = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await getAllSurahs();
-        setSurahs(response.chapters ?? []);
-        console.log("Surahs fetched successfully:", response);
-      } catch (error) {
-        console.error("Error fetching surahs:", error);
-        setError(
-          "Could not load surah list. Please check if the backend is running.",
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchSurahs();
-  }, []);
-
+const HomeComp = ({ surahs }: { surahs: Surah[] }) => {
   return (
-    <section className="relative w-full overflow-hidden rounded-3xl border border-amber-100/70 bg-gradient-to-br from-amber-50 via-rose-50 to-orange-100 p-4 shadow-xl shadow-amber-100/60 sm:p-6 lg:p-10">
-      <div className="pointer-events-none absolute -top-16 -right-12 h-48 w-48 rounded-full bg-orange-300/30 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-rose-300/25 blur-3xl" />
-
-      <div className="relative mb-8 flex flex-col gap-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-orange-700/80">
-          Quran Chapters Directory
-        </p>
-        <h1 className="text-3xl font-black leading-tight text-zinc-900 sm:text-4xl lg:text-5xl">
+    <section className="relative mx-auto w-full max-w-6xl">
+      <h1 className="text-center text-2xl md:text-5xl font-semibold uppercase tracking-[0.26em] text-amber-200/70">
+        The Holy Quran
+      </h1>
+      <h2
+        className="mt-2 text-center text-2xl md:text-3xl text-amber-100/90"
+        dir="rtl"
+        lang="ar"
+      >
+        القرآن الكريم
+      </h2>
+      <header className="mb-10 border-b border-amber-200/15 pb-8 lg:mb-12 lg:pb-10">
+        <h1 className="mt-4 text-4xl font-black leading-tight text-zinc-100 sm:text-3xl lg:text-4xl">
           All 114 Surahs
         </h1>
-        <p className="max-w-2xl text-sm text-zinc-700 sm:text-base">
-          Browse each chapter name in Arabic and English with quick chapter
-          details.
+        <p className="mt-3 max-w-3xl text-base text-zinc-400 sm:text-lg">
+          Select the Surah you want to read, with translation in both English
+          and Bangla.
         </p>
-      </div>
+      </header>
 
-      {isLoading && (
-        <div className="relative grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 12 }).map((_, index) => (
-            <div
-              key={index}
-              className="h-28 animate-pulse rounded-2xl border border-orange-200/60 bg-white/70"
-            />
-          ))}
-        </div>
-      )}
-
-      {!isLoading && error && (
-        <div className="relative rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
-          {error}
-        </div>
-      )}
-
-      {!isLoading && !error && (
-        <ul className="relative grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {surahs.map((surah) => (
-            <li
-              key={surah.id}
-              className="group rounded-2xl border border-amber-200/70 bg-white/80 p-4 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-amber-300 hover:bg-white hover:shadow-lg"
-            >
-              <div className="mb-2 flex items-center justify-between">
-                <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-900">
-                  #{surah.id}
-                </span>
-                <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                  {surah.verses_count} verses
-                </span>
-              </div>
-
-              <p
-                className="mb-2 text-right text-2xl leading-tight text-zinc-900 sm:text-3xl"
-                dir="rtl"
-                lang="ar"
+      {surahs && (
+        <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {surahs.map((surah, index) => {
+            const surahNumber = index + 1;
+            return (
+              <li
+                key={surahNumber}
+                className="group relative overflow-hidden rounded-2xl border border-zinc-800/90 bg-zinc-900/70 p-5 shadow-lg shadow-black/20 transition duration-300 hover:-translate-y-0.5 hover:border-amber-200/35"
               >
-                {surah.name_arabic}
-              </p>
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-zinc-700/80 group-hover:bg-amber-200/40 transition-colors" />
+                <Link
+                  href={`/surah/${surahNumber}`}
+                  className="block cursor-pointer"
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <span className="rounded-full border border-amber-200/30 bg-amber-100/10 px-2.5 py-1 text-xs font-bold text-amber-100">
+                      #{surahNumber}
+                    </span>
+                    <span className="text-xs font-semibold uppercase tracking-wide text-zinc-400 transition-colors group-hover:text-amber-100/80">
+                      {surah.totalAyahs} verses
+                    </span>
+                  </div>
 
-              <h2 className="text-lg font-bold text-zinc-900">
-                {surah.name_simple}
-              </h2>
-              <p className="mt-1 text-sm text-zinc-600">
-                {surah.translated_name.name}
-              </p>
+                  <p
+                    className="mb-4 text-right text-3xl leading-tight text-zinc-100 sm:text-4xl"
+                    dir="rtl"
+                    lang="ar"
+                  >
+                    {surah.surahNameArabic}
+                  </p>
 
-              <div className="mt-3 inline-flex rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium capitalize text-zinc-700">
-                {surah.revelation_place}
-              </div>
-            </li>
-          ))}
+                  <h2 className="text-xl font-bold text-zinc-100 transition-colors group-hover:text-amber-100">
+                    {surah.surahName}
+                  </h2>
+                  <p className="mt-1 text-sm text-zinc-400">
+                    {surah.surahNameTranslation}
+                  </p>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

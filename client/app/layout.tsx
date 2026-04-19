@@ -1,15 +1,25 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Poppins, Amiri, Rubik } from "next/font/google";
 import "./globals.css";
+import "lenis/dist/lenis.css";
+import { ReactLenis } from "lenis/react";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const amiri = Amiri({
+  variable: "--font-amiri",
   subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
+const rubik = Rubik({
+  variable: "--font-rubik",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -25,8 +35,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${poppins.variable} ${amiri.variable} ${rubik.variable} h-full antialiased`}
     >
+      <ReactLenis root />
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
