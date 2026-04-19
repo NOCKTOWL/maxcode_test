@@ -1,10 +1,10 @@
 import {Router, type Request, type Response} from 'express';
 
-export const QuranRoutes = Router();
+export const SurahRoutes = Router();
 
-QuranRoutes.get('/surah', async (req: Request, res: Response) => {
+SurahRoutes.get('/surah', async (req: Request, res: Response) => {
   try {
-    const response = await fetch('https://api.quran.com/api/v4/chapters');
+    const response = await fetch('https://quranapi.pages.dev/api/surah.json');
     const data = await response.json();
     res.json(data);
   } catch (error) {
@@ -13,10 +13,10 @@ QuranRoutes.get('/surah', async (req: Request, res: Response) => {
   }
 });
 
-QuranRoutes.get('/surah/:id', async (req: Request, res: Response) => {
+SurahRoutes.get('/surah/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const response = await fetch(`https://api.quran.com/api/v4/chapters/${id}`);
+    const response = await fetch(`https://quranapi.pages.dev/api/surah/${id}.json`);
     const data = await response.json();
     res.json(data);
   } catch (error) {

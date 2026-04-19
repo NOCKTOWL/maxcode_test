@@ -22,9 +22,9 @@ export async function getAllSurahs() {
   }
 }
 
-export async function getSurahByName(name: string) {
+export async function getSurahById(id: number) {
   try {
-    const response = await fetch(`${BASE_URL}/api/surah/${name}`, {
+    const response = await fetch(`${BASE_URL}/api/verses/by_chapter/${id}`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -40,7 +40,7 @@ export async function getSurahByName(name: string) {
     return data;
   }
   catch (error) {
-    console.error(`Error fetching surah with name ${name}:`, error);
+    console.error(`Error fetching surah with ID ${id}:`, error);
     throw error;
   }
 }
