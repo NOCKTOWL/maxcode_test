@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins, Amiri, Rubik } from "next/font/google";
+import { Poppins, Amiri, Rubik, Noto_Naskh_Arabic } from "next/font/google";
 import "./globals.css";
 import "lenis/dist/lenis.css";
 import { ReactLenis } from "lenis/react";
@@ -14,6 +14,12 @@ const amiri = Amiri({
   variable: "--font-amiri",
   subsets: ["latin"],
   weight: ["400", "700"],
+});
+
+const notoNaskhArabic = Noto_Naskh_Arabic({
+  variable: "--font-noto-naskh-arabic",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const rubik = Rubik({
@@ -35,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${poppins.variable} ${amiri.variable} ${rubik.variable} h-full antialiased`}
+      className={`${poppins.variable} ${amiri.variable} ${notoNaskhArabic.variable} ${rubik.variable} h-full antialiased`}
     >
       <ReactLenis root />
       <body className="min-h-full flex flex-col">{children}</body>

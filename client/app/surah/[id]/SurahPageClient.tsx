@@ -21,11 +21,11 @@ type SurahData = {
 };
 
 type TranslationLanguage = "english" | "bengali";
-type ArabicFontOption = "amiri" | "naskh" | "rubik";
+type ArabicFontOption = "amiri" | "noto-naskh-arabic" | "rubik";
 
 const FontClasses = {
   amiri: "font-amiri",
-  naskh: "font-naskh",
+  naksh: "font-noto-naskh-arabic",
   rubik: "font-rubik",
 };
 
@@ -54,7 +54,7 @@ const clamp = (value: number, min: number, max: number) =>
 
 const normalizeSettings = (raw: Partial<ReaderSettings>): ReaderSettings => ({
   arabicFont:
-    raw.arabicFont === "naskh" || raw.arabicFont === "rubik"
+    raw.arabicFont === "noto-naskh-arabic" || raw.arabicFont === "rubik"
       ? raw.arabicFont
       : "amiri",
   arabicFontSize: clamp(
@@ -186,9 +186,9 @@ const SurahPageClient = ({ surahData }: { surahData: SurahData }) => {
               }
               className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-amber-200/40 cursor-pointer"
             >
-              <option value="amiri">Amiri Style</option>
-              <option value="naskh">Naskh Style</option>
-              <option value="rubik">Rubik Style</option>
+              <option value="amiri">Amiri Font</option>
+              <option value="noto-naskh-arabic">Naskh Font</option>
+              <option value="rubik">Rubik Font</option>
             </select>
           </div>
 
