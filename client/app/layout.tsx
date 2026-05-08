@@ -3,6 +3,9 @@ import { Poppins, Amiri, Rubik, Noto_Naskh_Arabic } from "next/font/google";
 import "./globals.css";
 import "lenis/dist/lenis.css";
 import { ReactLenis } from "lenis/react";
+import Navbar from "./components/Navbar";
+import { NavbarVisibilityProvider } from "./components/NavbarVisibilityContext";
+import { ThemeProvider } from "./components/theme-provider";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -42,10 +45,22 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${poppins.variable} ${amiri.variable} ${notoNaskhArabic.variable} ${rubik.variable} h-full antialiased`}
     >
-      <ReactLenis root />
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <NavbarVisibilityProvider>
+            <Navbar />
+            <ReactLenis root>{children}</ReactLenis>
+          </NavbarVisibilityProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

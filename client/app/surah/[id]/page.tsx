@@ -1,5 +1,5 @@
 import SurahPageClient from "./SurahPageClient";
-import { getSurahById } from "@/app/lib/api";
+import { getAllSurahs, getSurahById } from "@/app/lib/api";
 
 type SurahData = {
   surahName: string;
@@ -12,6 +12,15 @@ type SurahData = {
   english: string[];
   bengali: string[];
   arabic1: string[];
+};
+
+type SurahSummary = {
+  surahName: string;
+  surahNameArabic: string;
+  surahNameTranslation: string;
+  revelationPlace: string;
+  totalAyah: number;
+  surahNo: number;
 };
 
 export async function generateStaticParams() {
@@ -27,14 +36,24 @@ export default async function Page({
 }) {
   const resolvedParams = await params;
   try {
-    const surahData: SurahData | null = await getSurahById(
-      parseInt(resolvedParams.id),
-    );
+    const surahId = parseInt(resolvedParams.id);
+    const [surahData, surahList] = await Promise.all([
+      getSurahById(surahId),
+      getAllSurahs(),
+    ]);
+    const normalizedSurahList: SurahSummary[] = Array.isArray(surahList)
+      ? surahList.map((surah, index) => ({
+          ...surah,
+          surahNo: index + 1,
+        }))
+      : [];
     if (!surahData) {
       console.error(`No data found for surah with ID ${resolvedParams.id}`);
       return;
     }
-    return <SurahPageClient surahData={surahData} />;
+    return (
+      <SurahPageClient surahData={surahData} surahList={normalizedSurahList} />
+    );
   } catch (error) {
     console.error(`Error fetching surah with ID ${resolvedParams.id}:`, error);
     return;
