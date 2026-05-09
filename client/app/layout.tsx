@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { Poppins, Amiri, Rubik, Noto_Naskh_Arabic } from "next/font/google";
+import { Inter, Poppins, Amiri, Rubik, Noto_Naskh_Arabic } from "next/font/google";
 import "./globals.css";
 import "lenis/dist/lenis.css";
 import { ReactLenis } from "lenis/react";
 import Navbar from "./components/Navbar";
 import { NavbarVisibilityProvider } from "./components/NavbarVisibilityContext";
 import { ThemeProvider } from "./components/theme-provider";
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+});
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -46,13 +52,14 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${poppins.variable} ${amiri.variable} ${notoNaskhArabic.variable} ${rubik.variable} h-full antialiased`}
+      className={` ${inter.variable} ${poppins.variable} ${amiri.variable} ${notoNaskhArabic.variable} ${rubik.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
+          themes={["light", "dark", "sepia"]}
           disableTransitionOnChange
         >
           <NavbarVisibilityProvider>

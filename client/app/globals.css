@@ -13,7 +13,11 @@
   --secondary-foreground: #f5f5f5;
   --accent-green: #428038;
   --accent-green-light: #86efac;
-  --text-primary: #353734;
+
+  --primary-text: #353734;
+  --secondary-text: #798b85;
+
+  --border-color: #f2f2f2;
 
   --surah-list-num-bg: #f5f5f5;
 }
@@ -24,9 +28,15 @@
   --secondary-foreground: #171717;
   --accent-green: #428038;
   --accent-green-light: #86efac;
-  --text-primary: #c4c4c4;
 
-  --surah-list-num-bg: #f5f5f5;
+  --slider-bg: #212121;
+
+  --primary-text: #c4c4c4;
+  --secondary-text: #787d7a;
+
+  --border-color: #212121;
+
+  --surah-list-num-bg: #171717;
 }
 
 .sepia {
@@ -34,7 +44,13 @@
   --foreground: #2f241b;
   --accent-green: #97724e;
   --accent-green-light: #caa57f;
-  --text-primary: #3a3027;
+
+  --primary-text: #3a3027;
+  --secondary-text: #827468;
+
+  --border-color: #e0d1c0;
+
+  --surah-list-num-bg: #f4efe2;
 }
 
 @theme inline {
@@ -47,6 +63,13 @@
   --font-noto-naskh-arabic: var(--font-noto-naskh-arabic);
   --font-rubik: var(--font-rubik);
 
+  --color-slider-bg: var(--slider-bg);
+
+  --color-primary-text: var(--primary-text);
+  --color-secondary-text: var(--secondary-text);
+
+  --color-border-color: var(--border-color);
+
   --color-secondary-foreground: var(--secondary-foreground);
   --color-surah-list-num-bg: var(--surah-list-num-bg);
 }
@@ -54,12 +77,29 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-poppins);
+  font-family: var(--font-inter);
 }
 
 a,
 button {
   cursor: pointer;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-accent-green);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(187, 247, 208, 0.95);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .surah-scroll {

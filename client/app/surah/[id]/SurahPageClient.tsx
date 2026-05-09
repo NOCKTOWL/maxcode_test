@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 // ICON IMPORTS
+import { FaChevronDown } from "react-icons/fa6";
 
 type SurahData = {
   surahName: string;
@@ -90,10 +91,16 @@ const SurahPageClient = ({
   surahList?: SurahSummary[];
 }) => {
   const [language, setLanguage] = useState<TranslationLanguage>("english");
+  const [filterSurahList, setFilterSurahList] = useState<
+    "surah" | "juz" | "page"
+  >("surah");
   const [searchQuery, setSearchQuery] = useState("");
   const [surahSearchQuery, setSurahSearchQuery] = useState("");
   const [isSurahListOpen, setIsSurahListOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [openSettingsPanel, setOpenSettingsPanel] = useState<
+    "reading" | "font" | ""
+  >("font");
   const { isVisible: isNavbarVisible } = useNavbarVisibility();
   const [settings, setSettings] = useState<ReaderSettings>(() => {
     if (typeof window === "undefined") {
@@ -197,57 +204,86 @@ const SurahPageClient = ({
     <div className="min-h-screen  pl-15 pr-0 text-primary lg:pl-87 lg:pr-80">
       {/* <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(70%_45%_at_50%_0%,rgba(251,191,36,0.08)_0%,rgba(9,9,11,0)_70%)]" /> */}
 
-      <aside className="fixed left-0 top-0 z-50 flex h-screen w-15 flex-col items-center gap-6 border-r border-zinc-800/80 py-6">
+      <aside className="fixed left-0 top-0 z-50 flex flex-col h-screen w-15 border-r border-border-color py-1">
         <Link
           href="/"
-          className="rounded-xl border border-zinc-800/80 bg-zinc-900/70 p-2 text-primary transition hover:border-amber-200/30 hover:text-primary"
+          className="group relative rounded-xl p-2 text-primary transition hover:border-border-color hover:text-primary"
           aria-label="Home"
         >
-          <Image src="/assets/home.svg" alt="Home" width={20} height={20} />
+          <Image src="/assets/icon.svg" alt="Home" width={36} height={36} />
         </Link>
-        <button
-          type="button"
-          className="rounded-xl border border-zinc-800/80 bg-zinc-900/70 p-2 text-primary transition hover:border-amber-200/30 hover:text-primary"
-          aria-label="Read Quran"
-        >
-          <Image
-            src="/assets/readQuran.svg"
-            alt="Read Quran"
-            width={20}
-            height={20}
-          />
-        </button>
-        <button
-          type="button"
-          className="rounded-xl border border-zinc-800/80 bg-zinc-900/70 p-2 text-primary transition hover:border-amber-200/30 hover:text-primary"
-          aria-label="Go to ayah"
-        >
-          <Image
-            src="/assets/goToAyah.svg"
-            alt="Go to ayah"
-            width={20}
-            height={20}
-          />
-        </button>
-        <button
-          type="button"
-          className="rounded-xl border border-zinc-800/80 bg-zinc-900/70 p-3 text-primary transition hover:border-amber-200/30 hover:text-primary"
-          aria-label="Bookmark"
-        >
-          <Image
-            src="/assets/bookmark.svg"
-            alt="Bookmarks"
-            width={20}
-            height={20}
-          />
-        </button>
-        <button
-          type="button"
-          className="rounded-xl border border-zinc-800/80 bg-zinc-900/70 p-3 text-primary transition hover:border-amber-200/30 hover:text-primary"
-          aria-label="Others"
-        >
-          <Image src="/assets/others.svg" alt="Others" width={20} height={20} />
-        </button>
+        <div className="flex flex-col justify-center items-center gap-6 w-full h-full">
+          <Link
+            href="/"
+            className="group relative rounded-xl p-2 text-primary transition hover:border-border-color hover:text-primary"
+            aria-label="Home"
+          >
+            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+              Home
+            </span>
+            <Image src="/assets/home.svg" alt="Home" width={20} height={20} />
+          </Link>
+          <button
+            type="button"
+            className="group relative rounded-xl p-2 text-primary transition hover:border-border-color hover:text-primary"
+            aria-label="Read Quran"
+          >
+            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+              Read Quran
+            </span>
+            <Image
+              src="/assets/readQuran.svg"
+              alt="Read Quran"
+              width={20}
+              height={20}
+            />
+          </button>
+          <button
+            type="button"
+            className="group relative rounded-xl p-2 text-primary transition hover:border-border-color hover:text-primary"
+            aria-label="Go to ayah"
+          >
+            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+              Go to Ayah
+            </span>
+            <Image
+              src="/assets/goToAyah.svg"
+              alt="Go to ayah"
+              width={20}
+              height={20}
+            />
+          </button>
+          <button
+            type="button"
+            className="group relative rounded-xl p-3 text-primary transition hover:border-amber-200/30 hover:text-primary"
+            aria-label="Bookmark"
+          >
+            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+              Bookmark
+            </span>
+            <Image
+              src="/assets/bookmark.svg"
+              alt="Bookmarks"
+              width={20}
+              height={20}
+            />
+          </button>
+          <button
+            type="button"
+            className="group relative rounded-xl p-3 text-primary transition hover:border-amber-200/30 hover:text-primary"
+            aria-label="Others"
+          >
+            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+              Others
+            </span>
+            <Image
+              src="/assets/others.svg"
+              alt="Others"
+              width={20}
+              height={20}
+            />
+          </button>
+        </div>
       </aside>
 
       {isSurahListOpen && (
@@ -260,14 +296,51 @@ const SurahPageClient = ({
       )}
 
       <aside
-        className={`fixed left-15 top-0 z-40 flex h-screen w-72 flex-col border-r border-zinc-800/80 transition-transform duration-300 lg:translate-x-0 ${isNavbarVisible ? "translate-y-15" : "translate-y-0"} ${
+        className={`fixed left-15 top-0 z-40 flex h-screen w-72 flex-col border-r border-border-color transition-transform duration-300 lg:translate-x-0 ${isNavbarVisible ? "translate-y-15" : "translate-y-0"} ${
           isSurahListOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="border-b border-zinc-800/80 px-4 py-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-            Surah List
-          </p>
+        <div className="px-4 py-5">
+          <div className="w-full ">
+            <div className="relative py-2 w-full inline-flex justify-around items-center rounded-full bg-secondary-foreground">
+              <span
+                className={`absolute  top-1/2 -translate-y-1/2 left-0 translate-x-0 z-1 w-1/3 h-7 rounded-full bg-background transition-all duration-300 ${filterSurahList === "surah" ? "ml-1 translate-x-0" : filterSurahList === "juz" ? "translate-x-full" : "-ml-1 translate-x-[200%]"} `}
+              ></span>
+              <button
+                type="button"
+                onClick={() => setFilterSurahList("surah")}
+                className={`cursor-pointer rounded-full  text-sm font-medium transition z-5 ${
+                  filterSurahList === "surah"
+                    ? "text-primary"
+                    : "text-secondary-text"
+                }`}
+              >
+                Surah
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterSurahList("juz")}
+                className={`cursor-pointer rounded-full text-sm font-medium transition z-5 ${
+                  filterSurahList === "juz"
+                    ? "text-primary"
+                    : "text-secondary-text"
+                }`}
+              >
+                Juz
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterSurahList("page")}
+                className={`cursor-pointer rounded-full text-sm font-medium transition z-5 ${
+                  filterSurahList === "page"
+                    ? "text-primary"
+                    : "text-secondary-text"
+                }`}
+              >
+                Page
+              </button>
+            </div>
+          </div>
           <input
             type="text"
             value={surahSearchQuery}
@@ -287,13 +360,17 @@ const SurahPageClient = ({
               className={`group min-w-50 flex items-center justify-between gap-8 rounded-xl border px-3 py-4 text-sm transition ${
                 surah.surahNo === surahData?.surahNo
                   ? "border-accent-green/30 bg-accent-green/10 text-primary"
-                  : "border-transparent text-primary hover:border-zinc-800 hover:bg-accent-green/10"
+                  : "border-transparent text-primary hover:bg-accent-green/10"
               }`}
             >
               <div
-                className={`ml-4 relative flex justify-center items-center text-sm font-semibold group-hover:text-primary ${surah.surahNo === surahData?.surahNo ? "text-primary" : "text-[#787d7a]"}  `}
+                className={`ml-4 relative flex justify-center items-center text-sm font-medium group-hover:text-background ${surah.surahNo === surahData?.surahNo ? "text-primary" : "text-[#787d7a]"}  `}
               >
-                <span className="z-5">{surah.surahNo}</span>
+                <span
+                  className={`z-5 ${surah.surahNo === surahData?.surahNo ? "text-background" : "text-primary"}`}
+                >
+                  {surah.surahNo}
+                </span>
                 <span
                   className={`z-0 absolute size-8 rotate-45 text-lg font-semibold text-primary rounded-sm group-hover:bg-accent-green ${surah.surahNo === surahData?.surahNo ? "bg-accent-green" : "bg-surah-list-num-bg"}`}
                 />
@@ -321,140 +398,303 @@ const SurahPageClient = ({
       )}
 
       <aside
-        className={`fixed right-0 top-0 z-40 flex h-screen w-80 flex-col gap-6 border-l border-zinc-800/80 p-5 transition-transform duration-300 lg:translate-x-0 ${isNavbarVisible ? "translate-y-15" : "translate-y-0"} ${
+        className={`fixed right-0 top-0 z-40 flex h-screen w-80 flex-col gap-4 p-5 border-l border-border-color transition-transform duration-300 lg:translate-x-0 ${isNavbarVisible ? "translate-y-15" : "translate-y-0"} ${
           isSettingsOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-            Translation
-          </p>
-          <div className="mt-3 inline-flex items-center rounded-full border border-zinc-700  p-1">
-            <button
-              type="button"
-              onClick={() => setLanguage("english")}
-              className={`cursor-pointer rounded-full px-4 py-1.5 text-sm font-semibold transition ${
-                language === "english"
-                  ? "bg-amber-100/10 text-primary"
-                  : "text-primary hover:text-primary"
-              }`}
+        <div className="rounded-xl ">
+          <button
+            type="button"
+            onClick={() =>
+              setOpenSettingsPanel((prev) =>
+                prev === "reading" ? "" : "reading",
+              )
+            }
+            className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-primary"
+            aria-expanded={openSettingsPanel === "reading"}
+          >
+            <span className="inline-flex items-center gap-2">
+              {openSettingsPanel === "reading" ? (
+                <Image
+                  src="/assets/readingSettingsActive.svg"
+                  alt="Reading Settings"
+                  width={20}
+                  height={20}
+                />
+              ) : (
+                <Image
+                  src="/assets/readingSettings.svg"
+                  alt="Reading Settings"
+                  width={20}
+                  height={20}
+                />
+              )}
+              <span>Reading Settings</span>
+            </span>
+            <span
+              className={`text-xs text-primary/70 ${openSettingsPanel === "reading" ? "rotate-180" : ""} transition-transform`}
             >
-              English
-            </button>
-            <button
-              type="button"
-              onClick={() => setLanguage("bengali")}
-              className={`cursor-pointer rounded-full px-4 py-1.5 text-sm font-semibold transition ${
-                language === "bengali"
-                  ? "bg-amber-100/10 text-primary"
-                  : "text-primary hover:text-primary"
-              }`}
-            >
-              Bangla
-            </button>
+              <FaChevronDown />
+            </span>
+          </button>
+
+          {/* {openSettingsPanel === "reading" && ( */}
+          <div
+            className={`space-y-4 px-4 transition-all duration-300 overflow-hidden ${openSettingsPanel === "reading" ? "h-full opacity-100 translate-y-2" : " opacity-0 h-0 translate-y-0"}`}
+          >
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-secondary-text">
+                Translations
+              </h3>
+              <select
+                className="w-full rounded-lg bg-secondary-foreground px-3 py-2 text-sm text-secondary-text outline-none focus:border-amber-200/40 cursor-pointer"
+                value={language}
+                onChange={(e) =>
+                  setLanguage(e.target.value as TranslationLanguage)
+                }
+              >
+                <option value="Saheeh International">
+                  Saheeh International
+                </option>
+                <option value="Sherif Ahmeti">Sherif Ahmeti</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-secondary-text">
+                Word-by-word translation
+              </h3>
+              <select
+                className="w-full rounded-lg bg-secondary-foreground px-3 py-2 text-sm text-secondary-text outline-none focus:border-amber-200/40 cursor-pointer"
+                value={language}
+                onChange={(e) =>
+                  setLanguage(e.target.value as TranslationLanguage)
+                }
+              >
+                <option value="Bengali">Bengali</option>
+                <option value="English">English</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="showbyword"
+                className="relative flex justify-between items-center text-sm font-semibold text-secondary-text"
+              >
+                Show by words
+                <input
+                  type="checkbox"
+                  id="showbyword"
+                  className="inline-block appearance-none bg-secondary-foreground h-7 w-14 rounded-full relative cursor-pointer transition-all after:content-[''] after:translate-x-0 after:absolute after:top-1 after:left-1 after:h-5 after:w-5 after:rounded-full after:bg-foreground/10 checked:after:bg-accent-green checked:after:translate-x-6 after:transition-all duration-300 outline-none"
+                />
+              </label>
+            </div>
+
+            <div>
+              <label
+                htmlFor="tajweed"
+                className="relative flex justify-between items-center text-sm font-semibold text-secondary-text"
+              >
+                Tajweed
+                <input
+                  type="checkbox"
+                  id="tajweed"
+                  className="inline-block appearance-none bg-secondary-foreground h-7 w-14 rounded-full relative cursor-pointer transition-all after:content-[''] after:translate-x-0 after:absolute after:top-1 after:left-1 after:h-5 after:w-5 after:rounded-full after:bg-foreground/10 checked:after:bg-accent-green checked:after:translate-x-6 after:transition-all duration-300 outline-none"
+                />
+              </label>
+            </div>
+            {/* <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+                Translation
+              </p>
+              <div className="mt-3 inline-flex items-center rounded-full p-1">
+                <button
+                  type="button"
+                  onClick={() => setLanguage("english")}
+                  className={`cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                    language === "english"
+                      ? "bg-amber-100/10 text-primary"
+                      : "text-primary hover:text-primary"
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLanguage("bengali")}
+                  className={`cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                    language === "bengali"
+                      ? "bg-amber-100/10 text-primary"
+                      : "text-primary hover:text-primary"
+                  }`}
+                >
+                  Bangla
+                </button>
+              </div>
+            </div> */}
+
+            {/* <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+                Search Translation
+              </p>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search in translation..."
+                className="mt-3 w-full rounded-full border border-zinc-700 bg-zinc-900/70 px-4 py-2 text-sm text-primary outline-none placeholder:text-primary focus:border-amber-200/40"
+              />
+            </div> */}
           </div>
+          {/* )} */}
         </div>
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-            Search Translation
-          </p>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Search in translation..."
-            className="mt-3 w-full rounded-full border border-zinc-700 bg-zinc-900/70 px-4 py-2 text-sm text-primary outline-none placeholder:text-primary focus:border-amber-200/40"
-          />
-        </div>
-
-        <div className="space-y-5">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-primary">
-              Reader Settings
-            </h2>
-          </div>
-
-          <div>
-            <label
-              htmlFor="arabic-font"
-              className="mb-2 block text-sm font-semibold text-primary"
+          <button
+            type="button"
+            onClick={() =>
+              setOpenSettingsPanel((prev) => (prev === "font" ? "" : "font"))
+            }
+            className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-primary"
+            aria-expanded={openSettingsPanel === "font"}
+          >
+            <span className="inline-flex items-center gap-2">
+              {openSettingsPanel === "font" ? (
+                <Image
+                  src="/assets/fontSettingsActive.svg"
+                  alt="Font Settings"
+                  width={20}
+                  height={20}
+                />
+              ) : (
+                <Image
+                  src="/assets/fontSettings.svg"
+                  alt="Font Settings"
+                  width={20}
+                  height={20}
+                />
+              )}
+              <span
+                className={` text-primar ${openSettingsPanel === "font" ? "text-accent-green" : ""}`}
+              >
+                Font Settings
+              </span>
+            </span>
+            <span
+              className={`text-xs text-primary/70 ${openSettingsPanel === "font" ? "rotate-180" : ""} transition-transform`}
             >
-              Arabic Font
-            </label>
-            <select
-              id="arabic-font"
-              value={settings.arabicFont}
-              onChange={(event) =>
-                setSettings((prev) => ({
-                  ...prev,
-                  arabicFont: event.target.value as ArabicFontOption,
-                }))
-              }
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-primary outline-none focus:border-amber-200/40 cursor-pointer"
-            >
-              <option value="amiri">Amiri Font</option>
-              <option value="noto-naskh-arabic">Naskh Font</option>
-              <option value="rubik">Rubik Font</option>
-            </select>
-          </div>
+              <FaChevronDown />
+            </span>
+          </button>
 
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-primary">
-              Arabic Font Size: {settings.arabicFontSize}px
-            </label>
-            <input
-              type="range"
-              min={28}
-              max={72}
-              step={1}
-              value={settings.arabicFontSize}
-              onChange={(event) =>
-                setSettings((prev) => ({
-                  ...prev,
-                  arabicFontSize: Number(event.target.value),
-                }))
-              }
-              className="w-full accent-amber-300 cursor-pointer"
-            />
-          </div>
+          {/* {openSettingsPanel === "font" && ( */}
+          <div
+            className={`space-y-4 px-4 py-4 transition-all duration-300 overflow-hidden ${openSettingsPanel === "font" ? "h-full opacity-100" : "opacity-0 h-0"}`}
+          >
+            <div>
+              <div className="mb-2 flex items-center justify-between text-sm font-semibold text-primary">
+                <label className="text-sm font-semibold text-primary">
+                  Arabic Font Size
+                </label>
+                <label className="text-sm font-semibold text-primary">
+                  {settings.arabicFontSize}
+                </label>
+              </div>
+              <input
+                type="range"
+                min={28}
+                max={72}
+                step={1}
+                value={settings.arabicFontSize}
+                onChange={(event) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    arabicFontSize: Number(event.target.value),
+                  }))
+                }
+                className="w-full h-1 accent-accent-green rounded-full cursor-pointer"
+              />
+            </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-primary">
-              Translation Font Size: {settings.translationFontSize}px
-            </label>
-            <input
-              type="range"
-              min={14}
-              max={40}
-              step={1}
-              value={settings.translationFontSize}
-              onChange={(event) =>
-                setSettings((prev) => ({
-                  ...prev,
-                  translationFontSize: Number(event.target.value),
-                }))
-              }
-              className="w-full accent-amber-300 cursor-pointer"
-            />
+            <div>
+              <div className="mb-2 flex items-center justify-between text-sm font-semibold text-primary">
+                <label>Translation Font Size</label>
+
+                <label>{settings.translationFontSize}</label>
+              </div>
+              <input
+                type="range"
+                min={14}
+                max={40}
+                step={1}
+                value={settings.translationFontSize}
+                onChange={(event) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    translationFontSize: Number(event.target.value),
+                  }))
+                }
+                className="w-full h-1 accent-accent-green rounded-full cursor-pointer"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="arabic-font"
+                className="mb-2 block text-sm font-semibold text-primary"
+              >
+                Arabic Font Face
+              </label>
+              <select
+                id="arabic-font"
+                value={settings.arabicFont}
+                onChange={(event) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    arabicFont: event.target.value as ArabicFontOption,
+                  }))
+                }
+                className="w-full rounded-lg bg-secondary-foreground px-3 py-2 text-sm text-primary outline-none focus:border-amber-200/40 cursor-pointer"
+              >
+                <option value="amiri">Amiri Font</option>
+                <option value="noto-naskh-arabic">Naskh Font</option>
+                <option value="rubik">Rubik Font</option>
+              </select>
+            </div>
           </div>
+          {/* )} */}
         </div>
       </aside>
 
       <section className="relative mx-auto max-w-6xl px-4 pb-16 pt-8 sm:px-4 lg:px-8 lg:pb-24 lg:pt-12">
-        <div className="mb-6 flex items-center gap-2">
+        {/* <div className="mb-6 flex items-center gap-2">
           <Link
             href="/"
-            className="cursor-pointer rounded-full border border-zinc-700 px-4 py-2 text-sm font-semibold text-primary transition hover:border-amber-200/30 hover:text-primary"
+            className="cursor-pointer rounded-full border border-border-color px-4 py-2 text-sm font-semibold text-primary transition hover:border-amber-200/30 hover:text-primary"
           >
             Back
           </Link>
-        </div>
+        </div> */}
 
         {surahData && (
           <>
-            <header className="mb-10 border-b border-amber-200/15 pb-8 lg:mb-12 lg:pb-10">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
+            <header className="grid grid-cols-3 items-center gap-4 mb-10 border-b border-border-color pb-8 lg:mb-12 lg:pb-10">
+              <Image
+                src="/assets/makkah.webp"
+                alt="Surah Header"
+                width={140}
+                height={48}
+                className="hidden lg:block col-span-1"
+              />
+              <div className="flex flex-col items-center text-center col-span-1 text-secondary-text">
+                <h1 className="text-primary-text text-xl font-semibold">
+                  Surah {surahData.surahName}
+                </h1>
+                <p className="text-sm text-secondary-text">
+                  Ayah-{surahData.totalAyah}, {surahData.revelationPlace}
+                </p>
+              </div>
+
+              {/* <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
                 Surah {surahData.surahNo}
               </p>
 
@@ -481,15 +721,15 @@ const SurahPageClient = ({
                 <span className="rounded-full border border-amber-200/30 bg-amber-100/10 px-3 py-1.5 font-semibold text-primary">
                   {surahData.totalAyah} Ayahs
                 </span>
-                <span className="rounded-full border border-zinc-700 px-3 py-1.5 text-primary">
+                <span className="rounded-full border border-border-color px-3 py-1.5 text-primary">
                   {surahData.revelationPlace}
                 </span>
-              </div>
+              </div> */}
             </header>
 
             <div className="space-y-10">
               {filteredAyahs.length === 0 && (
-                <p className="rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-6 text-center text-sm text-primary">
+                <p className="rounded-xl border border-border-color bg-zinc-900/60 px-4 py-6 text-center text-sm text-primary">
                   No ayah found for this search query.
                 </p>
               )}
@@ -497,10 +737,10 @@ const SurahPageClient = ({
               {filteredAyahs.map(({ ayah, index, translation }) => (
                 <article
                   key={index}
-                  className="border-b border-zinc-800/90 pb-10"
+                  className="border-b border-border-color pb-10"
                 >
                   <div className="mb-5 flex items-center gap-3">
-                    <span className="inline-flex h-8 w-8 items-center justify-center  font-bold text-green">
+                    <span className="inline-flex h-8 w-8 items-center justify-center font-bold text-accent-green">
                       {surahData.surahNo}:{index + 1}
                     </span>
                   </div>

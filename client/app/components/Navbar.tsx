@@ -58,7 +58,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`sticky ml-15 top-0 z-50 border-b border-zinc-800/80 backdrop-blur transition-transform duration-300 ${
+      className={`sticky ml-15 top-0 z-50 border-b border-border-color bg-background transition-transform duration-300 ${
         isVisible ? "translate-y-0" : "-translate-y-full"
       }`}
     >
@@ -68,7 +68,7 @@ const Navbar = () => {
             <button
               type="button"
               onClick={handleSurahToggle}
-              className="inline-flex items-center justify-center rounded-full border border-zinc-800/80 bg-zinc-900/70 p-2 text-zinc-300 transition hover:border-amber-200/30 hover:text-amber-100 md:hidden"
+              className="inline-flex items-center justify-center rounded-full border border-zinc-800/80 bg-zinc-900/70 p-2 text-primary transition hover:border-amber-200/30 hover:text-primary md:hidden"
               aria-label="Toggle surah list"
             >
               <FaBars />
@@ -76,16 +76,13 @@ const Navbar = () => {
           )}
           <Link
             href="/"
-            className="group flex items-center gap-2 px-3 py-2 text-sm font-semibold text-zinc-100 transition hover:border-amber-200/30"
+            className="group flex items-center gap-2 py-2 text-sm font-semibold text-primary transition hover:border-amber-200/30"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-green/15 text-accent-green">
-              <FaBookOpen className="text-base" />
-            </span>
             <div className="flex flex-col">
-              <span className=" text-lg text-zinc-200 md:inline-block">
+              <span className=" text-lg text-primary md:inline-block">
                 Quran Mazid
               </span>
-              <span className="hidden text-[10px] text-zinc-500 md:inline-block">
+              <span className="hidden text-[10px] text-secondary-text md:inline-block">
                 Read, Study and Learn The Quran
               </span>
             </div>
@@ -97,9 +94,9 @@ const Navbar = () => {
             <Link
               key={label}
               href={href}
-              className="group inline-flex items-center gap-2 rounded-full border border-transparent px-4 py-2 text-sm font-semibold text-zinc-300 transition hover:border-zinc-800 hover:bg-zinc-900/70 hover:text-zinc-100"
+              className="group inline-flex items-center gap-2 rounded-full border border-transparent px-4 py-2 text-sm font-semibold text-primary transition hover:border-zinc-800 hover:bg-zinc-900/70 hover:text-primary"
             >
-              <Icon className="text-sm text-amber-100/70 group-hover:text-amber-100" />
+              <Icon className="text-sm text-primary/70 group-hover:text-primary" />
               {label}
             </Link>
           ))}
@@ -108,14 +105,17 @@ const Navbar = () => {
         <div className="flex flex-1 items-center justify-end gap-3">
           <button
             type="button"
-            className="inline-flex items-center rounded-full bg-accent-green/10 p-2 text-sm font-semibold text-zinc-300 transition hover:border-amber-200/30 hover:text-amber-100"
+            className="group relative inline-flex items-center rounded-full bg-accent-green/10 p-2 text-sm font-semibold text-primary transition hover:border-amber-200/30 hover:text-primary"
           >
+            <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-3 -translate-y-1/2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-semibold text-background opacity-0 transition duration-200 group-hover:-translate-y-1 group-hover:opacity-100">
+              Search
+            </span>
             <Image
               src="/assets/search.svg"
               alt="Search"
               width={16}
               height={16}
-              className="text-zinc-300"
+              className="text-primary"
             />
           </button>
 
@@ -123,22 +123,25 @@ const Navbar = () => {
             <button
               type="button"
               onClick={() => setIsThemeMenuOpen((prev) => !prev)}
-              className="inline-flex items-center rounded-full bg-accent-green/10 p-2 text-sm font-semibold text-zinc-300 transition hover:border-amber-200/30 hover:text-amber-100"
+              className="group relative inline-flex items-center rounded-full bg-accent-green/10 p-2 text-sm font-semibold text-primary transition hover:border-amber-200/30 hover:text-primary"
               aria-haspopup="menu"
               aria-expanded={isThemeMenuOpen}
               aria-label="Theme options"
             >
+              <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-3 -translate-y-1/2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-semibold text-background opacity-0 transition duration-200 group-hover:-translate-y-1 group-hover:opacity-100">
+                Theme
+              </span>
               <Image
                 src="/assets/darkMode.svg"
                 alt="Theme"
                 width={16}
                 height={16}
-                className="text-zinc-300"
+                className="text-primary"
               />
             </button>
 
             {isThemeMenuOpen && (
-              <div className="absolute right-0 mt-2 w-40 rounded-xl border border-zinc-800/80 bg-zinc-950/95 p-1 text-sm text-zinc-200 shadow-lg">
+              <div className="absolute right-0 mt-2 w-40 rounded-xl bg-background p-1 text-sm text-primary shadow-lg">
                 {["light", "dark", "sepia", "system"].map((value) => (
                   <button
                     key={value}
@@ -147,16 +150,13 @@ const Navbar = () => {
                       setTheme(value);
                       setIsThemeMenuOpen(false);
                     }}
-                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition hover:bg-zinc-900/70 ${
+                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition hover:bg-secondary-foreground ${
                       activeTheme === value
-                        ? "bg-zinc-900/70 text-amber-100"
-                        : "text-zinc-300"
+                        ? "bg-secondary-foreground text-primary"
+                        : "text-primary"
                     }`}
                   >
                     <span className="capitalize">{value}</span>
-                    {activeTheme === value && (
-                      <span className="text-xs text-amber-100">●</span>
-                    )}
                   </button>
                 ))}
               </div>
@@ -166,7 +166,7 @@ const Navbar = () => {
           <button
             type="button"
             onClick={handleSettingsToggle}
-            className="inline-flex lg:hidden items-center gap-2 rounded-full bg-accent-green/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-amber-200/30 hover:text-amber-100"
+            className="inline-flex lg:hidden items-center gap-2 rounded-full bg-accent-green/10 px-3 py-2 text-sm font-semibold text-primary transition hover:border-amber-200/30 hover:text-primary"
             aria-label="Toggle settings"
           >
             <Image
@@ -174,13 +174,13 @@ const Navbar = () => {
               alt="Settings"
               width={16}
               height={16}
-              className="text-zinc-300"
+              className="text-primary"
             />
           </button>
 
           <Link
             href="/donate"
-            className="flex justfy-center gap-2 items-center rounded-full bg-accent-green px-4 py-2 text-sm font-semibold text-zinc-100 hover:bg-accent-green/25"
+            className="flex justfy-center gap-2 items-center rounded-full bg-accent-green px-4 py-2 text-sm font-semibold text-primary"
           >
             <span>Support Us</span>
             <Image
@@ -188,7 +188,7 @@ const Navbar = () => {
               alt="Heart"
               width={16}
               height={16}
-              className="ml-1 text-amber-100"
+              className="ml-1 text-primary"
             />
           </Link>
         </div>
