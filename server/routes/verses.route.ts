@@ -20,7 +20,6 @@ VersesRoutes.get('/verses/by_chapter/:chapter_number', async (req: Request, res:
 
 VersesRoutes.get('/audio/by_chapter/:chapter_number/:total_ayah', async (req: Request, res: Response) => {
     const { chapter_number, total_ayah } = await req.params;
-    console.log(`Received request for audio of chapter ${chapter_number} with total ayah ${total_ayah}`);
     try {
         const totalAyah = Number(total_ayah);
 

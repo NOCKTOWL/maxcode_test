@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
-import { Inter, Poppins, Amiri, Rubik, Noto_Naskh_Arabic } from "next/font/google";
+import localFont from "next/font/local";
+import {
+  Inter,
+  Poppins,
+  Amiri,
+  Rubik,
+  Noto_Naskh_Arabic,
+} from "next/font/google";
 import "./globals.css";
 import "lenis/dist/lenis.css";
 import { ReactLenis } from "lenis/react";
@@ -37,6 +44,16 @@ const rubik = Rubik({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
+const kfgq = localFont({
+  src: [
+    {
+      path: "./fonts/kfgq.otf",
+      style: "normal",
+    },
+  ],
+  variable: "--font-kfgq",
+});
+
 export const metadata: Metadata = {
   title: "MaxCode Test",
   description:
@@ -52,7 +69,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={` ${inter.variable} ${poppins.variable} ${amiri.variable} ${notoNaskhArabic.variable} ${rubik.variable} h-full antialiased`}
+      className={` ${inter.variable} ${poppins.variable} ${amiri.variable} ${notoNaskhArabic.variable} ${rubik.variable} ${kfgq.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider

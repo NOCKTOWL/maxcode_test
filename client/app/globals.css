@@ -65,10 +65,12 @@
   --color-foreground: var(--foreground);
   --color-accent-green-light: var(--accent-green-light);
   --color-accent-green: var(--accent-green);
+
   --font-poppins: var(--font-poppins);
   --font-amiri: var(--font-amiri);
   --font-noto-naskh-arabic: var(--font-noto-naskh-arabic);
   --font-rubik: var(--font-rubik);
+  --font-kfgq: var(--font-kfgq);
 
   --color-slider-bg: var(--slider-bg);
 

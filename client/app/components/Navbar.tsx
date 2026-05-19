@@ -194,7 +194,7 @@ const Navbar = () => {
                       setTheme(value);
                       setIsThemeMenuOpen(false);
                     }}
-                    className={`flex w-full items-center justify-start rounded-lg gap-2 px-3 py-3 text-left transition hover:bg-secondary-foreground ${
+                    className={`flex w-full items-center justify-start rounded-lg gap-2 p-3 text-left transition hover:bg-secondary-foreground ${
                       window.localStorage.getItem("theme") === value
                         ? "bg-secondary-foreground text-primary"
                         : "text-primary"
@@ -216,7 +216,7 @@ const Navbar = () => {
           <button
             type="button"
             onClick={handleSettingsToggle}
-            className="inline-flex lg:hidden items-center gap-2 rounded-full bg-accent-green/10 px-3 py-2 text-sm font-semibold text-primary transition hover:border-amber-200/30 hover:text-primary"
+            className={`inline-flex items-center gap-2 rounded-full bg-accent-green/10 p-2 text-sm font-semibold text-primary transition hover:border-amber-200/30 hover:text-primary ${pathname === "/" ? "" : "lg:hidden"}`}
             aria-label="Toggle settings"
           >
             <Image

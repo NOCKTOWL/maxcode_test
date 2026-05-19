@@ -24,12 +24,13 @@ type SurahData = {
 };
 
 type TranslationLanguage = "english" | "bengali";
-type ArabicFontOption = "amiri" | "noto-naskh-arabic" | "rubik";
+type ArabicFontOption = "amiri" | "noto-naskh-arabic" | "rubik" | "kfgq";
 
 const FontClasses = {
   amiri: "font-amiri",
   "noto-naskh-arabic": "font-noto-naskh-arabic",
   rubik: "font-rubik",
+  kfgq: "font-kfgq",
 };
 
 type ReaderSettings = {
@@ -75,7 +76,9 @@ const clamp = (value: number, min: number, max: number) =>
 
 const normalizeSettings = (raw: Partial<ReaderSettings>): ReaderSettings => ({
   arabicFont:
-    raw.arabicFont === "noto-naskh-arabic" || raw.arabicFont === "rubik"
+    raw.arabicFont === "noto-naskh-arabic" ||
+    raw.arabicFont === "rubik" ||
+    raw.arabicFont === "kfgq"
       ? raw.arabicFont
       : "amiri",
   arabicFontSize: clamp(
@@ -110,10 +113,12 @@ const SurahPageClient = ({
 }) => {
   const { theme } = useTheme();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const ayahRefs = useRef<Record<number, HTMLElement | null>>({});
   const [activeAyahIndex, setActiveAyahIndex] = useState<number | null>(null);
   const [moreOptionsMobile, setMoreOptionsMobile] = useState<number | null>(
     null,
   );
+  const [hasPlayedAudio, setHasPlayedAudio] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [language, setLanguage] = useState<TranslationLanguage>("english");
   const [filterSurahList, setFilterSurahList] = useState<
@@ -211,6 +216,13 @@ const SurahPageClient = ({
     activeAyahIndexRef.current = activeAyahIndex;
   }, [activeAyahIndex]);
 
+  useEffect(() => {
+    if (activeAyahIndex === null) return;
+    const activeNode = ayahRefs.current[activeAyahIndex];
+    if (!activeNode) return;
+    activeNode.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [activeAyahIndex]);
+
   const filteredSurahList =
     normalizedSurahQuery.length === 0
       ? surahList
@@ -302,6 +314,7 @@ const SurahPageClient = ({
       .then(() => {
         setActiveAyahIndex(ayahIndex);
         setIsPlaying(true);
+        setHasPlayedAudio(true);
       })
       .catch((error) => {
         console.error("Failed to play audio:", error);
@@ -312,21 +325,22 @@ const SurahPageClient = ({
     <div className="min-h-screen pl-2 md:pl-15 pr-2 sm:pl-0 text-primary lg:pl-87 lg:pr-80">
       {/* <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(70%_45%_at_50%_0%,rgba(251,191,36,0.08)_0%,rgba(9,9,11,0)_70%)]" /> */}
 
-      <aside className="hidden fixed left-0 top-0 z-50 md:flex flex-col h-screen w-15 border-r border-border-color py-1">
+      <aside className="fixed bg-secondary-foreground left-0 bottom-0 md:top-0 z-50 flex flex-row md:flex-col md:h-screen w-full md:w-15 border-r border-border-color py-1">
         <Link
           href="/"
-          className="group relative rounded-xl p-2 text-primary transition hover:border-border-color hover:text-primary"
+          className="hidden md:flex group relative rounded-xl p-2 text-primary transition hover:border-border-color hover:text-primary"
           aria-label="Home"
         >
           <Image src="/assets/icon.svg" alt="Home" width={36} height={36} />
         </Link>
-        <div className="flex flex-col justify-center items-center gap-6 w-full h-full">
+
+        <div className="flex md:flex-col justify-center items-center gap-6 md:gap-8 w-full h-full">
           <Link
             href="/"
-            className="group relative rounded-xl p-2 text-primary transition hover:border-border-color hover:text-primary"
+            className="hidden md:flex group relative rounded-xl p-2 text-primary transition hover:border-border-color hover:text-primary"
             aria-label="Home"
           >
-            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-foreground px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
               Home
             </span>
             <Image src="/assets/home.svg" alt="Home" width={20} height={20} />
@@ -336,7 +350,7 @@ const SurahPageClient = ({
             className="group relative rounded-xl p-2 text-primary transition hover:border-border-color hover:text-primary"
             aria-label="Read Quran"
           >
-            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-foreground px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
               Read Quran
             </span>
             <Image
@@ -351,7 +365,7 @@ const SurahPageClient = ({
             className="group relative rounded-xl p-2 text-primary transition hover:border-border-color hover:text-primary"
             aria-label="Go to ayah"
           >
-            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-foreground px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
               Go to Ayah
             </span>
             <Image
@@ -366,7 +380,7 @@ const SurahPageClient = ({
             className="group relative rounded-xl p-3 text-primary transition hover:border-amber-200/30 hover:text-primary"
             aria-label="Bookmark"
           >
-            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-foreground px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
               Bookmark
             </span>
             <Image
@@ -381,7 +395,7 @@ const SurahPageClient = ({
             className="group relative rounded-xl p-3 text-primary transition hover:border-amber-200/30 hover:text-primary"
             aria-label="Others"
           >
-            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+            <span className="pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-2 whitespace-nowrap rounded-md bg-foreground px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
               Others
             </span>
             <Image
@@ -795,9 +809,10 @@ const SurahPageClient = ({
                 }
                 className="w-full rounded-lg bg-secondary-foreground px-3 py-2 text-sm text-primary outline-none focus:border-amber-200/40 cursor-pointer"
               >
-                <option value="amiri">Amiri Font</option>
-                <option value="noto-naskh-arabic">Naskh Font</option>
-                <option value="rubik">Rubik Font</option>
+                <option value="kfgq">KFGQ</option>
+                <option value="amiri">Amiri</option>
+                <option value="noto-naskh-arabic">Naskh</option>
+                <option value="rubik">Rubik</option>
               </select>
             </div>
 
@@ -822,7 +837,7 @@ const SurahPageClient = ({
         </div>
       </aside>
 
-      <section className="relative mx-auto max-w-6xl px-0 pb-16 pt-8 md:px-4 lg:px-8 lg:pb-24 lg:pt-12">
+      <section className="relative mx-auto max-w-6xl px-0 pb-16 pt-8 lg:pb-24 lg:pt-12">
         {/* <div className="mb-6 flex items-center gap-2">
           <Link
             href="/"
@@ -834,7 +849,7 @@ const SurahPageClient = ({
 
         {surahData && (
           <>
-            <header className="grid grid-rows-2 md:grid-cols-3 items-center gap-4 md:mb-10 pb-8 lg:mb-12 lg:pb-10">
+            <header className="grid grid-rows-2 md:grid-cols-3 items-center gap-4 px-4 md:mb-10 pb-8 lg:mb-12 lg:pb-10">
               {surahData.revelationPlace === "Mecca" ? (
                 <Image
                   src="/assets/makkah.webp"
@@ -903,7 +918,7 @@ const SurahPageClient = ({
               </div> */}
             </header>
 
-            <div className="space-y-10">
+            <div className="">
               {filteredAyahs.length === 0 && (
                 <p className="rounded-xl border border-border-color bg-accent-green/10 px-4 py-6 text-center text-sm text-primary">
                   No ayah found for this search query.
@@ -913,7 +928,10 @@ const SurahPageClient = ({
               {filteredAyahs.map(({ ayah, index, translation, audio }) => (
                 <article
                   key={index}
-                  className="border-b border-border-color pb-10"
+                  ref={(node) => {
+                    ayahRefs.current[index] = node;
+                  }}
+                  className={`border-b border-border-color p-6 ${activeAyahIndex === index ? "bg-accent-green/10" : ""} transition-colors`}
                 >
                   <div className="mb-5 flex items-center justify-between px-2 md:px-0 gap-3">
                     <span className="inline-flex h-8 w-8 items-center justify-center font-bold text-accent-green">
@@ -943,7 +961,7 @@ const SurahPageClient = ({
                         onClick={() => handlePlayAyah(index, audio)}
                         aria-pressed={activeAyahIndex === index && isPlaying}
                       >
-                        <span className="ml-2 pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-3 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+                        <span className="ml-2 pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-3 whitespace-nowrap rounded-md bg-foreground px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
                           Play
                         </span>
                         {isPlaying && activeAyahIndex === index ? (
@@ -969,7 +987,7 @@ const SurahPageClient = ({
                         onClick={() => handlePlayAyah(index, audio)}
                         aria-pressed={activeAyahIndex === index && isPlaying}
                       >
-                        <span className="ml-2 pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-3 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+                        <span className="ml-2 pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-3 whitespace-nowrap rounded-md bg-foreground px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
                           Tafsir
                         </span>
                         <Image
@@ -986,7 +1004,7 @@ const SurahPageClient = ({
                         onClick={() => handlePlayAyah(index, audio)}
                         aria-pressed={activeAyahIndex === index && isPlaying}
                       >
-                        <span className="ml-2 pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-3 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+                        <span className="ml-2 pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-3 whitespace-nowrap rounded-md bg-foreground px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
                           Bookmark
                         </span>
                         <Image
@@ -1003,7 +1021,7 @@ const SurahPageClient = ({
                         onClick={() => handlePlayAyah(index, audio)}
                         aria-pressed={activeAyahIndex === index && isPlaying}
                       >
-                        <span className="ml-2 pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-3 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+                        <span className="ml-2 pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-3 whitespace-nowrap rounded-md bg-foreground px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
                           More
                         </span>
                         <Image
@@ -1043,6 +1061,7 @@ const SurahPageClient = ({
           </>
         )}
       </section>
+
       {moreOptionsMobile !== null && (
         <>
           <div
@@ -1133,6 +1152,121 @@ const SurahPageClient = ({
             </div>
           </div>
         </>
+      )}
+
+      {hasPlayedAudio && (
+        <div className="fixed bottom-0 left-0 z-50 w-full bg-secondary-foreground px-20 py-3.5 flex items-center justify-center md:justify-between">
+          <p className="hidden md:flex min-w-0 text-sm text-primary-text">
+            {surahData?.surahName}
+            {activeAyahIndex !== null ? ` : ${activeAyahIndex + 1}` : ""}
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            <button className="hover:bg-accent-green/7 rounded-full p-2">
+              <Image
+                src="/assets/moreIcon.svg"
+                alt="More Options"
+                width={18}
+                height={18}
+              />
+            </button>
+
+            <button
+              onClick={() => {
+                if (activeAyahIndex === null) return;
+                const prevIndex = activeAyahIndex - 1;
+                if (prevIndex >= 0) {
+                  handlePlayAyah(prevIndex, getAudioByAyahIndex(prevIndex));
+                  const prevAyahElement = ayahRefs.current[prevIndex];
+                  if (prevAyahElement) {
+                    prevAyahElement.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
+                  }
+                }
+              }}
+              className="flex items-center justify-centerhover:bg-accent-green/7 rounded-full p-2"
+            >
+              <Image
+                src="/assets/audioPlayerNextPrevAyah.svg"
+                alt="Previous"
+                width={18}
+                height={18}
+                className="rotate-180"
+              />
+            </button>
+
+            {isPlaying ? (
+              <button
+                className="flex items-center gap-2 justify-center rounded-full bg-accent-green p-2 text-sm font-medium text-primary transition-transform duration-300 active:scale-90 outline-none"
+                onClick={() => {
+                  audioRef.current?.pause();
+                  setIsPlaying(false);
+                }}
+              >
+                <Image
+                  src="/assets/audioPlayerPause.svg"
+                  alt="Pause"
+                  width={16}
+                  height={16}
+                />
+              </button>
+            ) : (
+              <button
+                className="flex items-center gap-2 justify-center rounded-full bg-accent-green p-2 text-sm font-medium text-primary transition-transform duration-300 active:scale-90 outline-none"
+                onClick={() => {
+                  audioRef.current?.play();
+                  setIsPlaying(true);
+                }}
+              >
+                <Image
+                  src="/assets/audioPlayerPlay.svg"
+                  alt="Play"
+                  width={18}
+                  height={18}
+                />
+              </button>
+            )}
+
+            <button
+              onClick={() => {
+                if (activeAyahIndex === null) return;
+                const nextIndex = activeAyahIndex + 1;
+                if (nextIndex < ayahs.length) {
+                  handlePlayAyah(nextIndex, getAudioByAyahIndex(nextIndex));
+                  const nextAyahElement = ayahRefs.current[nextIndex];
+                  if (nextAyahElement) {
+                    nextAyahElement.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
+                  }
+                }
+              }}
+              className="hover:bg-accent-green/7 rounded-full p-2"
+            >
+              <Image
+                src="/assets/audioPlayerNextPrevAyah.svg"
+                alt="Next"
+                width={18}
+                height={18}
+              />
+            </button>
+
+            <button
+              onClick={() => setHasPlayedAudio(false)}
+              className="flex items-center justify-center hover:bg-accent-green/7 rounded-full p-2"
+            >
+              <Image
+                src="/assets/close.svg"
+                alt="Close Player"
+                width={18}
+                height={18}
+              />
+            </button>
+          </div>
+          <span aria-hidden className="hidden md:inline-block w-[72px]" />
+        </div>
       )}
       <ScrollToTopButton />
     </div>
