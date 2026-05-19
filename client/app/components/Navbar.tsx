@@ -17,19 +17,7 @@ import { useTheme } from "next-themes";
 
 const Navbar = () => {
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
-  const themeIconClasses: Record<string, string> = {
-    light:
-      "inline-block h-4 w-4 bg-accent-green [mask-image:url('/assets/lightMode.svg')] [mask-repeat:no-repeat] [mask-position:center] [mask-size:contain] [webkit-mask-image:url('/assets/lightMode.svg')] [webkit-mask-repeat:no-repeat] [webkit-mask-position:center] [webkit-mask-size:contain]",
-    dark: "inline-block h-4 w-4 bg-accent-green [mask-image:url('/assets/darkMode.svg')] [mask-repeat:no-repeat] [mask-position:center] [mask-size:contain] [webkit-mask-image:url('/assets/darkMode.svg')] [webkit-mask-repeat:no-repeat] [webkit-mask-position:center] [webkit-mask-size:contain]",
-    sepia:
-      "inline-block h-4 w-4 bg-accent-green [mask-image:url('/assets/sepiaMode.svg')] [mask-repeat:no-repeat] [mask-position:center] [mask-size:contain] [webkit-mask-image:url('/assets/sepiaMode.svg')] [webkit-mask-repeat:no-repeat] [webkit-mask-position:center] [webkit-mask-size:contain]",
-    system:
-      "inline-block h-4 w-4 bg-accent-green [mask-image:url('/assets/systemMode.svg')] [mask-repeat:no-repeat] [mask-position:center] [mask-size:contain] [webkit-mask-image:url('/assets/systemMode.svg')] [webkit-mask-repeat:no-repeat] [webkit-mask-position:center] [webkit-mask-size:contain]",
-  };
-  const themeIconClassName =
-    themeIconClasses[window.localStorage.getItem("theme") || "system"] ??
-    themeIconClasses.system;
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const showSurahToggle = pathname?.startsWith("/surah/");
   const { isVisible, setIsVisible } = useNavbarVisibility();
   const lastScrollY = useRef(0);
@@ -180,7 +168,20 @@ const Navbar = () => {
               <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-3 -translate-y-1/2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-semibold text-background opacity-0 transition duration-200 group-hover:-translate-y-1 group-hover:opacity-100">
                 Theme
               </span>
-              <span aria-hidden="true" className={themeIconClassName} />
+              <span
+                aria-hidden="true"
+                className="inline-block h-4 w-4 bg-accent-green"
+                style={{
+                  maskImage: `url(/assets/${resolvedTheme}Mode.svg)`,
+                  maskRepeat: "no-repeat",
+                  maskPosition: "center",
+                  maskSize: "contain",
+                  WebkitMaskImage: `url(/assets/${resolvedTheme}Mode.svg)`,
+                  WebkitMaskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  WebkitMaskSize: "contain",
+                }}
+              />
             </button>
 
             {isThemeMenuOpen && (
