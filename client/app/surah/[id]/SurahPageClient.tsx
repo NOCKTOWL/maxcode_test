@@ -1,10 +1,11 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import ScrollToTopButton from "@/app/components/ScrollToTopButton";
 import { useNavbarVisibility } from "@/app/components/NavbarVisibilityContext";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // ICON IMPORTS
 import { FaChevronDown } from "react-icons/fa6";
@@ -37,10 +38,19 @@ type ReaderSettings = {
   translationFontSize: number;
 };
 
+type AyahAudio = {
+  reciter: string;
+  url: string;
+  originalUrl: string;
+};
+
+type SurahAudioMap = Record<string, Record<string, AyahAudio>>;
+
 type AyahItem = {
   ayah: string;
   index: number;
   translation: string;
+  audio?: Record<string, AyahAudio>;
 };
 
 type SurahSummary = {
@@ -83,18 +93,36 @@ const normalizeSettings = (raw: Partial<ReaderSettings>): ReaderSettings => ({
 const escapeRegExp = (value: string) =>
   value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+const getFirstAudioUrl = (audio?: Record<string, AyahAudio>) => {
+  if (!audio) return null;
+  const firstEntry = Object.values(audio)[0];
+  return firstEntry?.url || firstEntry?.originalUrl || null;
+};
+
 const SurahPageClient = ({
   surahData,
   surahList = [],
+  audioMap,
 }: {
   surahData: SurahData;
   surahList?: SurahSummary[];
+  audioMap?: SurahAudioMap;
 }) => {
+  const { theme } = useTheme();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [activeAyahIndex, setActiveAyahIndex] = useState<number | null>(null);
+  const [moreOptionsMobile, setMoreOptionsMobile] = useState<number | null>(
+    null,
+  );
+  const [isPlaying, setIsPlaying] = useState(false);
   const [language, setLanguage] = useState<TranslationLanguage>("english");
   const [filterSurahList, setFilterSurahList] = useState<
     "surah" | "juz" | "page"
   >("surah");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [rightSiderbarOptions, setRightSidebarOptions] = useState<
+    "translation" | "reading"
+  >("translation");
+  const [searchQuery] = useState("");
   const [surahSearchQuery, setSurahSearchQuery] = useState("");
   const [isSurahListOpen, setIsSurahListOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -162,6 +190,7 @@ const SurahPageClient = ({
     ayah,
     index,
     translation: translationLines[index] ?? "Translation unavailable",
+    audio: audioMap?.[String(index + 1)],
   }));
 
   const filteredAyahs =
@@ -171,6 +200,17 @@ const SurahPageClient = ({
           item.translation.toLowerCase().includes(normalizedQuery),
         );
 
+  const filteredAyahsRef = useRef<AyahItem[]>([]);
+  const activeAyahIndexRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    filteredAyahsRef.current = filteredAyahs;
+  }, [filteredAyahs]);
+
+  useEffect(() => {
+    activeAyahIndexRef.current = activeAyahIndex;
+  }, [activeAyahIndex]);
+
   const filteredSurahList =
     normalizedSurahQuery.length === 0
       ? surahList
@@ -179,6 +219,9 @@ const SurahPageClient = ({
             `${surah.surahName} ${surah.surahNameTranslation} ${surah.surahNameArabic}`.toLowerCase();
           return searchable.includes(normalizedSurahQuery);
         });
+
+  const getAudioByAyahIndex = (ayahIndex: number) =>
+    ayahs.find((item) => item.index === ayahIndex)?.audio;
 
   const highlightSearchTerm = (text: string) => {
     if (!normalizedQuery) return text;
@@ -200,11 +243,76 @@ const SurahPageClient = ({
     );
   };
 
+  const playNextAyah = (currentIndex: number) => {
+    const list = filteredAyahsRef.current;
+    const currentPosition = list.findIndex(
+      (item) => item.index === currentIndex,
+    );
+
+    for (let i = currentPosition + 1; i < list.length; i += 1) {
+      const nextItem = list[i];
+      if (getFirstAudioUrl(nextItem.audio)) {
+        handlePlayAyah(nextItem.index, nextItem.audio);
+        return;
+      }
+    }
+
+    setIsPlaying(false);
+    setActiveAyahIndex(null);
+  };
+
+  const handlePlayAyah = (
+    ayahIndex: number,
+    audio?: Record<string, AyahAudio>,
+  ) => {
+    const url = getFirstAudioUrl(audio);
+    if (!url) {
+      console.warn("No audio available for ayah", ayahIndex + 1);
+      return;
+    }
+
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      audioRef.current.addEventListener("ended", () => {
+        const currentIndex = activeAyahIndexRef.current;
+        if (currentIndex === null) {
+          setIsPlaying(false);
+          return;
+        }
+        playNextAyah(currentIndex);
+      });
+      audioRef.current.addEventListener("pause", () => {
+        setIsPlaying(false);
+      });
+    }
+
+    const audioElement = audioRef.current;
+
+    if (activeAyahIndex === ayahIndex && isPlaying) {
+      audioElement.pause();
+      return;
+    }
+
+    if (audioElement.src !== url) {
+      audioElement.src = url;
+    }
+
+    audioElement
+      .play()
+      .then(() => {
+        setActiveAyahIndex(ayahIndex);
+        setIsPlaying(true);
+      })
+      .catch((error) => {
+        console.error("Failed to play audio:", error);
+      });
+  };
+
   return (
-    <div className="min-h-screen  pl-15 pr-0 text-primary lg:pl-87 lg:pr-80">
+    <div className="min-h-screen pl-2 md:pl-15 pr-2 sm:pl-0 text-primary lg:pl-87 lg:pr-80">
       {/* <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(70%_45%_at_50%_0%,rgba(251,191,36,0.08)_0%,rgba(9,9,11,0)_70%)]" /> */}
 
-      <aside className="fixed left-0 top-0 z-50 flex flex-col h-screen w-15 border-r border-border-color py-1">
+      <aside className="hidden fixed left-0 top-0 z-50 md:flex flex-col h-screen w-15 border-r border-border-color py-1">
         <Link
           href="/"
           className="group relative rounded-xl p-2 text-primary transition hover:border-border-color hover:text-primary"
@@ -296,7 +404,7 @@ const SurahPageClient = ({
       )}
 
       <aside
-        className={`fixed left-15 top-0 z-40 flex h-screen w-72 flex-col border-r border-border-color transition-transform duration-300 lg:translate-x-0 ${isNavbarVisible ? "translate-y-15" : "translate-y-0"} ${
+        className={`fixed left-0 md:left-15 top-0 z-40 bg-background flex h-screen w-full md:w-72 flex-col border-r border-border-color transition-transform duration-300 lg:translate-x-0 ${isNavbarVisible ? "translate-y-15" : "translate-y-0"} ${
           isSurahListOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -398,11 +506,43 @@ const SurahPageClient = ({
       )}
 
       <aside
-        className={`fixed right-0 top-0 z-40 flex h-screen w-80 flex-col gap-4 p-5 border-l border-border-color transition-transform duration-300 lg:translate-x-0 ${isNavbarVisible ? "translate-y-15" : "translate-y-0"} ${
+        className={`fixed right-0 top-0 z-40 flex h-screen bg-background w-full md:w-80 flex-col gap-4 p-2 border-l border-border-color transition-transform duration-300 lg:translate-x-0 ${isNavbarVisible ? "translate-y-15" : "translate-y-0"} ${
           isSettingsOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="rounded-xl ">
+        <div className="px-4 py-5">
+          <div className="w-full ">
+            <div className="relative py-1 border-4 border-secondary-foreground w-full inline-flex justify-around items-center rounded-full bg-secondary-foreground">
+              <span
+                className={`absolute top-1/2 -translate-y-1/2 left-0 translate-x-0 z-1 w-1/2 h-7 rounded-full bg-background transition-all duration-300 ${rightSiderbarOptions === "translation" ? "translate-x-0" : "translate-x-full"} `}
+              ></span>
+              <button
+                type="button"
+                onClick={() => setRightSidebarOptions("translation")}
+                className={`cursor-pointer rounded-full  text-sm font-medium transition z-5 ${
+                  rightSiderbarOptions === "translation"
+                    ? "text-primary"
+                    : "text-subtitle-secondary-text"
+                }`}
+              >
+                Translation
+              </button>
+              <button
+                type="button"
+                onClick={() => setRightSidebarOptions("reading")}
+                className={`cursor-pointer rounded-full text-sm font-medium transition z-5 ${
+                  rightSiderbarOptions === "reading"
+                    ? "text-primary"
+                    : "text-subtitle-secondary-text"
+                }`}
+              >
+                Reading
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div>
           <button
             type="button"
             onClick={() =>
@@ -410,7 +550,7 @@ const SurahPageClient = ({
                 prev === "reading" ? "" : "reading",
               )
             }
-            className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-primary"
+            className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-primary cursor-pointer"
             aria-expanded={openSettingsPanel === "reading"}
           >
             <span className="inline-flex items-center gap-2">
@@ -440,7 +580,7 @@ const SurahPageClient = ({
 
           {/* {openSettingsPanel === "reading" && ( */}
           <div
-            className={`space-y-4 px-4 transition-all duration-300 overflow-hidden ${openSettingsPanel === "reading" ? "h-full opacity-100 translate-y-2" : " opacity-0 h-0 translate-y-0"}`}
+            className={`space-y-4 px-4 transition-all duration-300 overflow-hidden ${openSettingsPanel === "reading" ? "h-[86%] opacity-100 translate-y-2" : " opacity-0 h-0 translate-y-0"}`}
           >
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-secondary-text">
@@ -555,7 +695,7 @@ const SurahPageClient = ({
             onClick={() =>
               setOpenSettingsPanel((prev) => (prev === "font" ? "" : "font"))
             }
-            className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-primary"
+            className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-primary cursor-pointer"
             aria-expanded={openSettingsPanel === "font"}
           >
             <span className="inline-flex items-center gap-2">
@@ -660,12 +800,29 @@ const SurahPageClient = ({
                 <option value="rubik">Rubik Font</option>
               </select>
             </div>
+
+            <div className="w-full p-3.5 rounded-lg bg-accent-green/10 border border-accent-green/7">
+              <p className="text-base text-primary-text font-bold mb-2">
+                Help spread the knowledge of Islam
+              </p>
+              <p className="text-xs text-subtitle-secondary-text leading-relaxed mb-4">
+                Your regular support helps us reach our religious brothers and
+                sisters with the message of Islam. Join our mission and be part
+                of the big change.
+              </p>
+              <Link
+                href="#"
+                className="w-full mt-3 block text-sm text-background font-semibold bg-accent-green text-center py-2.5 rounded-md"
+              >
+                Support Us
+              </Link>
+            </div>
           </div>
           {/* )} */}
         </div>
       </aside>
 
-      <section className="relative mx-auto max-w-6xl px-4 pb-16 pt-8 sm:px-4 lg:px-8 lg:pb-24 lg:pt-12">
+      <section className="relative mx-auto max-w-6xl px-0 pb-16 pt-8 md:px-4 lg:px-8 lg:pb-24 lg:pt-12">
         {/* <div className="mb-6 flex items-center gap-2">
           <Link
             href="/"
@@ -677,22 +834,41 @@ const SurahPageClient = ({
 
         {surahData && (
           <>
-            <header className="grid grid-cols-3 items-center gap-4 mb-10 border-b border-border-color pb-8 lg:mb-12 lg:pb-10">
-              <Image
-                src="/assets/makkah.webp"
-                alt="Surah Header"
-                width={140}
-                height={48}
-                className="hidden lg:block col-span-1"
-              />
+            <header className="grid grid-rows-2 md:grid-cols-3 items-center gap-4 md:mb-10 pb-8 lg:mb-12 lg:pb-10">
+              {surahData.revelationPlace === "Mecca" ? (
+                <Image
+                  src="/assets/makkah.webp"
+                  alt="Surah Header"
+                  width={140}
+                  height={48}
+                  className={`hidden lg:block col-span-1 ${theme === "dark" ? "invert" : theme === "sepia" ? "mix-blend-multiply" : ""}`}
+                />
+              ) : (
+                <Image
+                  src="/assets/madinah.avif"
+                  alt="Surah Header"
+                  width={140}
+                  height={94}
+                  className={`hidden lg:block col-span-1 ${theme === "dark" ? "invert" : theme === "sepia" ? "mix-blend-multiply" : ""}`}
+                />
+              )}
+
               <div className="flex flex-col items-center text-center col-span-1 text-secondary-text">
-                <h1 className="text-primary-text text-xl font-semibold">
+                <h1 className="text-primary-text text-lg md:text-xl font-semibold">
                   Surah {surahData.surahName}
                 </h1>
-                <p className="text-sm text-secondary-text">
+                <p className="text-xs md:text-sm text-secondary-text">
                   Ayah-{surahData.totalAyah}, {surahData.revelationPlace}
                 </p>
               </div>
+
+              <Image
+                src="/assets/bismillah.svg"
+                alt="Surah Header"
+                width={220}
+                height={45}
+                className={`flex w-43 opacity-40 justify-self-center lg:justify-self-end row-span-1 md:col-span-1 ${theme === "dark" ? "invert" : ""}`}
+              />
 
               {/* <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
                 Surah {surahData.surahNo}
@@ -729,45 +905,235 @@ const SurahPageClient = ({
 
             <div className="space-y-10">
               {filteredAyahs.length === 0 && (
-                <p className="rounded-xl border border-border-color bg-zinc-900/60 px-4 py-6 text-center text-sm text-primary">
+                <p className="rounded-xl border border-border-color bg-accent-green/10 px-4 py-6 text-center text-sm text-primary">
                   No ayah found for this search query.
                 </p>
               )}
 
-              {filteredAyahs.map(({ ayah, index, translation }) => (
+              {filteredAyahs.map(({ ayah, index, translation, audio }) => (
                 <article
                   key={index}
                   className="border-b border-border-color pb-10"
                 >
-                  <div className="mb-5 flex items-center gap-3">
+                  <div className="mb-5 flex items-center justify-between px-2 md:px-0 gap-3">
                     <span className="inline-flex h-8 w-8 items-center justify-center font-bold text-accent-green">
                       {surahData.surahNo}:{index + 1}
                     </span>
+                    <span>
+                      <button
+                        onClick={() => setMoreOptionsMobile(index)}
+                        className="md:hidden rounded-full hover:bg-accent-green/7"
+                      >
+                        <Image
+                          src="/assets/moreIcon.svg"
+                          alt="More Options"
+                          width={18}
+                          height={18}
+                          className="inline-block md:hidden"
+                        />
+                      </button>
+                    </span>
                   </div>
 
-                  <p
-                    className={`text-right leading-[2.25] text-primary ${FontClasses[settings.arabicFont]} `}
-                    dir="rtl"
-                    lang="ar"
-                    style={{
-                      fontSize: `${settings.arabicFontSize}px`,
-                    }}
-                  >
-                    {ayah}
-                  </p>
+                  <div className="flex items-start gap-7">
+                    <div className="hidden md:flex flex-col items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        className="group relative flex items-center justify-center size-8 text-sm text-primary transition rounded-full hover:bg-accent-green/7"
+                        onClick={() => handlePlayAyah(index, audio)}
+                        aria-pressed={activeAyahIndex === index && isPlaying}
+                      >
+                        <span className="ml-2 pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-3 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+                          Play
+                        </span>
+                        {isPlaying && activeAyahIndex === index ? (
+                          <Image
+                            src="/assets/pauseIcon.svg"
+                            alt="Pause Audio"
+                            width={16}
+                            height={16}
+                          />
+                        ) : (
+                          <Image
+                            src="/assets/playIcon.svg"
+                            alt="Play Audio"
+                            width={18}
+                            height={18}
+                          />
+                        )}
+                      </button>
 
-                  <p
-                    className="mx-auto mt-6 max-w-4xl text-left leading-8 text-primary"
-                    style={{ fontSize: `${settings.translationFontSize}px` }}
-                  >
-                    {highlightSearchTerm(translation)}
-                  </p>
+                      <button
+                        type="button"
+                        className="group relative flex items-center justify-center size-8 text-sm text-primary transition rounded-full hover:bg-accent-green/7"
+                        onClick={() => handlePlayAyah(index, audio)}
+                        aria-pressed={activeAyahIndex === index && isPlaying}
+                      >
+                        <span className="ml-2 pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-3 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+                          Tafsir
+                        </span>
+                        <Image
+                          src="/assets/readingSettings.svg"
+                          alt="Tafsir"
+                          width={16}
+                          height={16}
+                        />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="group relative flex items-center justify-center size-8 text-sm text-primary transition rounded-full hover:bg-accent-green/7"
+                        onClick={() => handlePlayAyah(index, audio)}
+                        aria-pressed={activeAyahIndex === index && isPlaying}
+                      >
+                        <span className="ml-2 pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-3 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+                          Bookmark
+                        </span>
+                        <Image
+                          src="/assets/bookmark.svg"
+                          alt="Bookmark"
+                          width={16}
+                          height={16}
+                        />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="group relative flex items-center justify-center size-8 text-sm text-primary transition rounded-full hover:bg-accent-green/7"
+                        onClick={() => handlePlayAyah(index, audio)}
+                        aria-pressed={activeAyahIndex === index && isPlaying}
+                      >
+                        <span className="ml-2 pointer-events-none absolute left-1/2 -translate-y-1/2 top-1/2 translate-x-3 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-medium text-background opacity-0 transition duration-200 group-hover:translate-x-4 group-hover:opacity-100">
+                          More
+                        </span>
+                        <Image
+                          src="/assets/moreIcon.svg"
+                          alt="More"
+                          width={16}
+                          height={16}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex-1">
+                      <p
+                        className={`text-right leading-[2.25] text-primary-text ${FontClasses[settings.arabicFont]} `}
+                        dir="rtl"
+                        lang="ar"
+                        style={{
+                          fontSize: `${settings.arabicFontSize}px`,
+                        }}
+                      >
+                        {ayah}
+                      </p>
+
+                      <p
+                        className="mx-auto mt-6 max-w-4xl text-left leading-8 text-primary-text"
+                        style={{
+                          fontSize: `${settings.translationFontSize}px`,
+                        }}
+                      >
+                        {highlightSearchTerm(translation)}
+                      </p>
+                    </div>
+                  </div>
                 </article>
               ))}
             </div>
           </>
         )}
       </section>
+      {moreOptionsMobile !== null && (
+        <>
+          <div
+            onClick={() => setMoreOptionsMobile(null)}
+            className="absolute inset-0 z-50 w-full bg-black/50 h-screen"
+          />
+          <div
+            className="h-90 bottom-0 fixed bg-background inset-x-0 rounded-t-2xl z-50 flex items-start justify-start lg:hidden"
+            onClick={() => setMoreOptionsMobile(null)}
+          >
+            <div className="flex flex-col space-y-2 px-3 py-6">
+              <button
+                onClick={() =>
+                  handlePlayAyah(
+                    moreOptionsMobile,
+                    getAudioByAyahIndex(moreOptionsMobile),
+                  )
+                }
+                className="flex py-2 gap-4 items-center text-primary"
+              >
+                <Image
+                  src="/assets/playIcon.svg"
+                  alt="Play"
+                  width={20}
+                  height={20}
+                />
+                <span className="text-base text-subtitle-secondary-text">
+                  Play
+                </span>
+              </button>
+              <button className="flex py-2 gap-4 items-center text-primary">
+                <Image
+                  src="/assets/readingSettings.svg"
+                  alt="Tafsir"
+                  width={20}
+                  height={20}
+                  className="brightness-60"
+                />
+                <span className="text-base text-subtitle-secondary-text">
+                  Tafsir
+                </span>
+              </button>
+              <button className="flex py-2 gap-4 items-center text-primary">
+                <Image
+                  src="/assets/bookmark.svg"
+                  alt="Bookmark"
+                  width={20}
+                  height={20}
+                  className="brightness-80"
+                />
+                <span className="text-base text-subtitle-secondary-text">
+                  Bookmark
+                </span>
+              </button>
+              <button className="flex py-2 gap-4 items-center text-primary">
+                <Image
+                  src="/assets/ayahCopy.svg"
+                  alt="Copy"
+                  width={20}
+                  height={20}
+                />
+                <span className="text-base text-subtitle-secondary-text">
+                  Copy Ayah
+                </span>
+              </button>
+              <button className="flex py-2 gap-4 items-center text-primary">
+                <Image
+                  src="/assets/copyLink.svg"
+                  alt="Copy Link"
+                  width={20}
+                  height={20}
+                />
+                <span className="text-base text-subtitle-secondary-text">
+                  Copy Link
+                </span>
+              </button>
+              <button className="flex py-2 gap-4 items-center text-primary">
+                <Image
+                  src="/assets/ayahShare.svg"
+                  alt="Share"
+                  width={20}
+                  height={20}
+                />
+                <span className="text-base text-subtitle-secondary-text">
+                  Share
+                </span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
       <ScrollToTopButton />
     </div>
   );

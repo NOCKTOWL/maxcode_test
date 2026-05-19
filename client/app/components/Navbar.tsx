@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { FaBars, FaBookOpen } from "react-icons/fa6";
+import { FaBars } from "react-icons/fa6";
 import { useNavbarVisibility } from "./NavbarVisibilityContext";
 import { useTheme } from "next-themes";
 
@@ -22,7 +22,7 @@ const Navbar = () => {
   const { isVisible, setIsVisible } = useNavbarVisibility();
   const lastScrollY = useRef(0);
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
-  const activeTheme = theme ?? "system";
+  const themeMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,6 +48,30 @@ const Navbar = () => {
     };
   }, [setIsVisible]);
 
+  useEffect(() => {
+    if (!isThemeMenuOpen) {
+      return;
+    }
+
+    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
+      if (!themeMenuRef.current) {
+        return;
+      }
+
+      if (!themeMenuRef.current.contains(event.target as Node)) {
+        setIsThemeMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+    };
+  }, [isThemeMenuOpen]);
+
   const handleSurahToggle = () => {
     window.dispatchEvent(new CustomEvent("surah-sidebar-toggle"));
   };
@@ -58,17 +82,28 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`sticky ml-15 top-0 z-50 border-b border-border-color bg-background transition-transform duration-300 ${
+      className={`sticky top-0 z-50  bg-background transition-transform duration-300 ${pathname === "/" ? "" : "md:ml-15 border-b border-border-color"} ${
         isVisible ? "translate-y-0" : "-translate-y-full"
       }`}
     >
-      <div className=" flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3">
+      <div
+        className={`flex items-center gap-4 px-4 py-2 md:py-0 sm:px-6 lg:px-10 ${pathname === "/" ? "justify-around" : "justify-between"}`}
+      >
+        <div className="flex items-center justify-center gap-3">
+          {pathname === "/" && (
+            <Image
+              src="/assets/icon.svg"
+              alt="Logo"
+              width={36}
+              height={36}
+              className="text-primary"
+            />
+          )}
           {showSurahToggle && (
             <button
               type="button"
               onClick={handleSurahToggle}
-              className="inline-flex items-center justify-center rounded-full border border-zinc-800/80 bg-zinc-900/70 p-2 text-primary transition hover:border-amber-200/30 hover:text-primary md:hidden"
+              className="inline-flex items-center justify-center rounded-full bg-accent-green/10 p-2 text-accent-green md:hidden"
               aria-label="Toggle surah list"
             >
               <FaBars />
@@ -76,10 +111,10 @@ const Navbar = () => {
           )}
           <Link
             href="/"
-            className="group flex items-center gap-2 py-2 text-sm font-semibold text-primary transition hover:border-amber-200/30"
+            className="group flex items-center gap-2 py-2 text-sm text-primary transition hover:border-amber-200/30"
           >
             <div className="flex flex-col">
-              <span className=" text-lg text-primary md:inline-block">
+              <span className=" text-lg text-primary md:inline-block font-bold">
                 Quran Mazid
               </span>
               <span className="hidden text-[10px] text-secondary-text md:inline-block">
@@ -102,24 +137,26 @@ const Navbar = () => {
           ))}
         </nav> */}
 
-        <div className="flex flex-1 items-center justify-end gap-3">
-          <button
-            type="button"
-            className="group relative inline-flex items-center rounded-full bg-accent-green/10 p-2 text-sm font-semibold text-primary transition hover:border-amber-200/30 hover:text-primary"
-          >
-            <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-3 -translate-y-1/2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-semibold text-background opacity-0 transition duration-200 group-hover:-translate-y-1 group-hover:opacity-100">
-              Search
-            </span>
-            <Image
-              src="/assets/search.svg"
-              alt="Search"
-              width={16}
-              height={16}
-              className="text-primary"
-            />
-          </button>
+        <div className="flex items-center justify-end gap-3">
+          {pathname !== "/" && (
+            <button
+              type="button"
+              className="group relative inline-flex items-center rounded-full bg-accent-green/10 p-2 text-sm font-semibold text-primary transition hover:border-amber-200/30 hover:text-primary"
+            >
+              <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-3 -translate-y-1/2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-semibold text-background opacity-0 transition duration-200 group-hover:-translate-y-1 group-hover:opacity-100">
+                Search
+              </span>
+              <Image
+                src="/assets/search.svg"
+                alt="Search"
+                width={16}
+                height={16}
+                className="text-primary"
+              />
+            </button>
+          )}
 
-          <div className="relative">
+          <div className="relative" ref={themeMenuRef}>
             <button
               type="button"
               onClick={() => setIsThemeMenuOpen((prev) => !prev)}
@@ -131,17 +168,24 @@ const Navbar = () => {
               <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-3 -translate-y-1/2 whitespace-nowrap rounded-md bg-zinc-900/90 px-3 py-2 text-xs font-semibold text-background opacity-0 transition duration-200 group-hover:-translate-y-1 group-hover:opacity-100">
                 Theme
               </span>
-              <Image
-                src="/assets/darkMode.svg"
-                alt="Theme"
-                width={16}
-                height={16}
-                className="text-primary"
+              <span
+                aria-hidden="true"
+                className="inline-block h-4 w-4 bg-accent-green"
+                style={{
+                  maskImage: `url(/assets/${window.localStorage.getItem("theme") || "system"}Mode.svg)`,
+                  maskRepeat: "no-repeat",
+                  maskPosition: "center",
+                  maskSize: "contain",
+                  WebkitMaskImage: `url(/assets/${window.localStorage.getItem("theme") || "system"}Mode.svg)`,
+                  WebkitMaskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  WebkitMaskSize: "contain",
+                }}
               />
             </button>
 
             {isThemeMenuOpen && (
-              <div className="absolute right-0 mt-2 w-40 rounded-xl bg-background p-1 text-sm text-primary shadow-lg">
+              <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-32 rounded-xl bg-background p-1 text-base text-primary shadow-lg">
                 {["light", "dark", "sepia", "system"].map((value) => (
                   <button
                     key={value}
@@ -150,12 +194,18 @@ const Navbar = () => {
                       setTheme(value);
                       setIsThemeMenuOpen(false);
                     }}
-                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition hover:bg-secondary-foreground ${
-                      activeTheme === value
+                    className={`flex w-full items-center justify-start rounded-lg gap-2 px-3 py-3 text-left transition hover:bg-secondary-foreground ${
+                      window.localStorage.getItem("theme") === value
                         ? "bg-secondary-foreground text-primary"
                         : "text-primary"
                     }`}
                   >
+                    <Image
+                      src={`/assets/${value}Mode.svg`}
+                      alt={value}
+                      width={16}
+                      height={16}
+                    />
                     <span className="capitalize">{value}</span>
                   </button>
                 ))}
@@ -180,9 +230,9 @@ const Navbar = () => {
 
           <Link
             href="/donate"
-            className="flex justfy-center gap-2 items-center rounded-full bg-accent-green px-4 py-2 text-sm font-semibold text-primary"
+            className="hidden md:flex justify-center gap-2 items-center rounded-full bg-accent-green px-4 py-2 text-sm font-medium text-primary"
           >
-            <span>Support Us</span>
+            <span className="text-background">Support Us</span>
             <Image
               src="/assets/hearts.svg"
               alt="Heart"

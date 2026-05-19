@@ -14,6 +14,7 @@ SurahRoutes.get('/surah', async (req: Request, res: Response) => {
 });
 
 SurahRoutes.get('/surah/:id', async (req: Request, res: Response) => {
+  console.log(`Received request for surah with ID ${req.params.id}`);
   const { id } = req.params;
   try {
     const response = await fetch(`https://quranapi.pages.dev/api/surah/${id}.json`);

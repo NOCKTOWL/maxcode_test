@@ -25,7 +25,6 @@ export async function getAllSurahs() {
 }
 
 export async function getSurahById(id: number) {
-  
   try {
     const response = await fetch(`${BASE_URL}/api/verses/by_chapter/${id}`, {
       method: "GET",
@@ -44,6 +43,31 @@ export async function getSurahById(id: number) {
   }
   catch (error) {
     console.error(`Error fetching surah with ID ${id}:`, error);
+    throw error;
+  }
+}
+
+export async function getSurahAudioById(id: number, totalAyah: number) {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/audio/by_chapter/${id}/${totalAyah}`,
+      {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+      cache: "force-cache",
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Error fetching audio for surah with ID ${id}:`, error);
     throw error;
   }
 }
