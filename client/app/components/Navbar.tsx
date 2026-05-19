@@ -172,11 +172,11 @@ const Navbar = () => {
                 aria-hidden="true"
                 className="inline-block h-4 w-4 bg-accent-green"
                 style={{
-                  maskImage: `url(/assets/${theme}Mode.svg)`,
+                  maskImage: `url(/assets/${localStorage.getItem("theme") || "system"}Mode.svg)`,
                   maskRepeat: "no-repeat",
                   maskPosition: "center",
                   maskSize: "contain",
-                  WebkitMaskImage: `url(/assets/${theme}Mode.svg)`,
+                  WebkitMaskImage: `url(/assets/${localStorage.getItem("theme") || "system"}Mode.svg)`,
                   WebkitMaskRepeat: "no-repeat",
                   WebkitMaskPosition: "center",
                   WebkitMaskSize: "contain",
@@ -195,7 +195,7 @@ const Navbar = () => {
                       setIsThemeMenuOpen(false);
                     }}
                     className={`flex w-full items-center justify-start rounded-lg gap-2 p-3 text-left transition hover:bg-secondary-foreground ${
-                      theme === value
+                      localStorage.getItem("theme") === value
                         ? "bg-secondary-foreground text-primary"
                         : "text-primary"
                     }`}
